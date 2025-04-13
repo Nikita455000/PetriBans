@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petribans</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #121212;
+            color: #ffffff;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        body.light {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        h1 {
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+        body.light textarea {
+            background-color: #f5f5f5;
+            color: #000000;
+            border: 1px solid #ccc;
+        }
+        textarea:focus {
+            border-color: #6200ea;
+            outline: none;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            border-radius: 5px;
+            transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .add-btn {
+            background-color: #4CAF50;
+        }
+        .add-btn:hover {
+            background-color: #45a049;
+        }
+        body.light .add-btn {
+            color: #ffffff;
+        }
+        .edit-btn {
+            background-color: #FFA500;
+        }
+        .edit-btn:hover {
+            background-color: #e69500;
+        }
+        body.light .edit-btn {
+            color: #ffffff;
+        }
+        .delete-btn {
+            background-color: #f44336;
+        }
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+        body.light .delete-btn {
+            color: #ffffff;
+        }
+        .entry {
+            border: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e1e1e;
+            border-radius: 5px;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        body.light .entry {
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+        }
+        .entry-text {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        /* Стили для панели языков */
+        .language-panel {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #1e1e1e;
+            border-radius: 10px 0 0 10px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            width: 50px;
+            overflow: hidden;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+        }
+        body.light .language-panel {
+            background-color: #f5f5f5;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .language-panel.open {
+            width: 200px;
+        }
+        .language-toggle, .theme-toggle {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.light .language-toggle, body.light .theme-toggle {
+            background-color: #ddd;
+            color: #000;
+        }
+        .language-toggle:hover, .theme-toggle:hover {
+            background-color: #444;
+        }
+        body.light .language-toggle:hover, body.light .theme-toggle:hover {
+            background-color: #ccc;
+        }
+        .language-list {
+            display: none;
+            padding: 10px;
+        }
+        .language-panel.open .language-list {
+            display: block;
+        }
+        .language-list button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            background-color: #333;
+            padding: 8px;
+            text-align: left;
+            border-radius: 5px;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        body.light .language-list button {
+            background-color: #ddd;
+            color: #000;
+        }
+        .language-list button:hover {
+            background-color: #444;
+        }
+        body.light .language-list button:hover {
+            background-color: #ccc;
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="site-title">Petribans</h1>
+    <div class="input-container">
+        <textarea id="inputText" placeholder="Введите информацию..."></textarea>
+        <button class="add-btn" onclick="addEntry()">Добавить</button>
+    </div>
+    <div id="entries"></div>
+
+    <!-- Панель языков и темы -->
+    <div class="language-panel" id="languagePanel">
+        <div class="language-toggle" onclick="toggleLanguagePanel()">🌐</div>
+        <div class="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</div>
+        <div class="language-list">
+            <button onclick="changeLanguage('ru')">Русский</button>
+            <button onclick="changeLanguage('en')">English</button>
+            <button onclick="changeLanguage('uk')">Українська</button>
+            <button onclick="changeLanguage('tr')">Türkçe</button>
+            <button onclick="changeLanguage('pl')">Polski</button>
+            <button onclick="changeLanguage('es')">Español</button>
+            <button onclick="changeLanguage('fr')">Français</button>
+        </div>
+    </div>
+
+    <script>
+        let entries = JSON.parse(localStorage.getItem('entries')) || [];
+        let currentLang = 'ru';
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+
+        // Переводы интерфейса
+        const translations = {
+            ru: {
+                title: 'ПетриБанс',
+                placeholder: 'Введите информацию...',
+                add: 'Добавить',
+                edit: 'Редактировать',
+                delete: 'Удалить',
+                confirmDelete: 'Удалить эту запись?'
+            },
+            en: {
+                title: 'Petribans',
+                placeholder: 'Enter information...',
+                add: 'Add',
+                edit: 'Edit',
+                delete: 'Delete',
+                confirmDelete: 'Delete this entry?'
+            },
+            uk: {
+                title: 'ПетріБанс',
+                placeholder: 'Введіть інформацію...',
+                add: 'Додати',
+                edit: 'Редагувати',
+                delete: 'Видалити',
+                confirmDelete: 'Видалити цей запис?'
+            },
+            tr: {
+                title: 'Mini Sitem',
+                placeholder: 'Bilgi girin...',
+                add: 'Ekle',
+                edit: 'Düzenle',
+                delete: 'Sil',
+                confirmDelete: 'Bu girişi sil?'
+            },
+            pl: {
+                title: 'Moja mini strona',
+                placeholder: 'Wprowadź informacje...',
+                add: 'Dodaj',
+                edit: 'Edytuj',
+                delete: 'Usuń',
+                confirmDelete: 'Usunąć ten wpis?'
+            },
+            es: {
+                title: 'Mi mini sitio',
+                placeholder: 'Ingresa información...',
+                add: 'Añadir',
+                edit: 'Editar',
+                delete: 'Eliminar',
+                confirmDelete: '¿Eliminar esta entrada?'
+            },
+            fr: {
+                title: 'Mon mini site',
+                placeholder: 'Entrez des informations...',
+                add: 'Ajouter',
+                edit: 'Modifier',
+                delete: 'Supprimer',
+                confirmDelete: 'Supprimer cette entrée ?'
+            }
+        };
+
+        // Загрузка темы при старте
+        function loadTheme() {
+            document.body.className = currentTheme;
+            const themeToggle = document.querySelector('.theme-toggle');
+            themeToggle.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Переключение темы
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', currentTheme);
+            loadTheme();
+            loadEntries();
+        }
+
+        // Загрузка записей
+        function loadEntries() {
+            const entriesContainer = document.getElementById('entries');
+            entriesContainer.innerHTML = '';
+            entries.forEach((text, index) => {
+                const entry = document.createElement('div');
+                entry.className = 'entry';
+                entry.innerHTML = `
+                    <span class="entry-text">${text}</span>
+                    <div>
+                        <button class="edit-btn" onclick="editEntry(${index})">${translations[currentLang].edit}</button>
+                        <button class="delete-btn" onclick="deleteEntry(${index})">${translations[currentLang].delete}</button>
+                    </div>
+                `;
+                entriesContainer.prepend(entry);
+            });
+        }
+
+        // Добавление записи
+        function addEntry() {
+            const input = document.getElementById('inputText');
+            const text = input.value.trim();
+            if (text) {
+                entries.push(text);
+                saveEntries();
+                loadEntries();
+                input.value = '';
+            }
+        }
+
+        // Редактирование записи
+        function editEntry(index) {
+            const newText = prompt(translations[currentLang].edit + ':', entries[index]);
+            if (newText !== null && newText.trim() !== '') {
+                entries[index] = newText.trim();
+                saveEntries();
+                loadEntries();
+            }
+        }
+
+        // Удаление записи
+        function deleteEntry(index) {
+            if (confirm(translations[currentLang].confirmDelete)) {
+                entries.splice(index, 1);
+                saveEntries();
+                loadEntries();
+            }
+        }
+
+        // Сохранение записей
+        function saveEntries() {
+            localStorage.setItem('entries', JSON.stringify(entries));
+        }
+
+        // Переключение панели языков
+        function toggleLanguagePanel() {
+            const panel = document.getElementById('languagePanel');
+            panel.classList.toggle('open');
+        }
+
+        // Смена языка
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('site-title').textContent = translations[lang].title;
+            document.getElementById('inputText').placeholder = translations[lang].placeholder;
+            document.querySelector('.add-btn').textContent = translations[lang].add;
+            loadEntries();
+            toggleLanguagePanel();
+        }
+
+        // Поддержка Enter
+        document.getElementById('inputText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addEntry();
+            }
+        });
+
+        // Инициализация
+        loadTheme();
+        loadEntries();
+    </script>
+</body>
+</html>
